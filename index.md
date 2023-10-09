@@ -32,7 +32,9 @@ In this project, I develop a model to predict the over/under result for NFL game
 <img src="images/dummy_thumbnail.jpg?raw=true"/>
 
 ---
-### Category Name 2
+### Skill-based Projects
+
+Smaller projects showcasing specific data science skills and visualizations.
 
 - [Project 1 Title](http://example.com/)
 - [Project 2 Title](http://example.com/)
