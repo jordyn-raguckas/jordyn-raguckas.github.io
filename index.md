@@ -4,7 +4,7 @@
 
 ### Selected Data Science Projects
 
-[Eagles6 Fantasy Football League History](/sample_page)
+[Eagles6 Fantasy Football League History](https://jordynragu15.shinyapps.io/Eagles6_History/)
 <img src="images/dummy_thumbnail.jpg?raw=true"/>
 
 ---
