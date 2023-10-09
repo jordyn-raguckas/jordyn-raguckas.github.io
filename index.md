@@ -11,15 +11,27 @@ from 2011-2022.
 [View website](https://jordynragu15.shinyapps.io/Eagles6_History/)
 
 ---
+
+### Hotel PPI Time Series Analysis
+
+Times series analysis of Hotel Producer Price Index using Seasonal Decomposition, Exponential Smoothing, and Box and Jenkins models.
+
+[View code]
+
+---
+
+### NFL Betting Algorithm
+
+In this project, I develop a model to predict the over/under result for NFL games using linear discriminant analysis and random forests.
+
+[View code]
+
+---
+
 [Project 2 Title](/pdf/sample_presentation.pdf)
 <img src="images/dummy_thumbnail.jpg?raw=true"/>
 
 ---
-[Project 3 Title](http://example.com/)
-<img src="images/dummy_thumbnail.jpg?raw=true"/>
-
----
-
 ### Category Name 2
 
 - [Project 1 Title](http://example.com/)
