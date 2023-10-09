@@ -4,7 +4,8 @@
 
 ### Eagles6 Fantasy Football League History
 
-R Shiny website for my fantasy football league
+R Shiny website for my fantasy football league. Showcasing
+individual and head-to-head statistics from 2011-2022.  
 [View website](https://jordynragu15.shinyapps.io/Eagles6_History/)
 
 ---
