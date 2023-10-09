@@ -5,7 +5,7 @@
 ### Eagles6 Fantasy Football League History
 
 R Shiny website for my fantasy football league
-(https://jordynragu15.shinyapps.io/Eagles6_History/)
+[View website](https://jordynragu15.shinyapps.io/Eagles6_History/)
 
 ---
 [Project 2 Title](/pdf/sample_presentation.pdf)
