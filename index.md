@@ -2,7 +2,7 @@
 
 ---
 
-### Category Name 1 
+### Selected Data Science Projects
 
 [Eagles6 Fantasy Football League History](/sample_page)
 <img src="images/dummy_thumbnail.jpg?raw=true"/>
