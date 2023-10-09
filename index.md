@@ -1,11 +1,11 @@
-## Portfolio
+## Selected Data Science Projects
 
 ---
 
-### Selected Data Science Projects
+### Eagles6 Fantasy Football League History
 
-[Eagles6 Fantasy Football League History](https://jordynragu15.shinyapps.io/Eagles6_History/)
 R Shiny website for my fantasy football league
+(https://jordynragu15.shinyapps.io/Eagles6_History/)
 
 ---
 [Project 2 Title](/pdf/sample_presentation.pdf)
