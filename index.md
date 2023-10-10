@@ -38,7 +38,7 @@ In this project, I develop a model to predict the over/under result for NFL game
 
 Smaller projects showcasing specific data science skills and visualizations.
 
-- [Dice Game Shiny App]([http://example.com/](https://jordynragu15.shinyapps.io/Dice_Game/))
+- [Dice Game Shiny App]((https://jordynragu15.shinyapps.io/Dice_Game/))
 - [Project 2 Title](http://example.com/)
 - [Project 3 Title](http://example.com/)
 - [Project 4 Title](http://example.com/)
