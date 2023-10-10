@@ -1,0 +1,396 @@
+---
+title: "NFL Betting"
+author: "Jordyn Raguckas"
+date: '2022-06-28'
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Final Project
+
+```{r, message=FALSE}
+setwd("~/Documents/STA 536/STA536 Final")
+final <- read.csv("spreadspoke_scores.csv")
+library(tidyverse)
+library(caret)
+library(GGally)
+NFL<-final %>% #betting data only for 1979 season to 2018 season
+  filter(schedule_season >=1979) %>%
+  filter(schedule_season <= 2018) 
+```
+
+```{r, message=FALSE}
+#created over/under/push variable to find the betting result
+NFL$over_under_result <-ifelse(NFL$score_home + NFL$score_away == NFL$over_under_line, 'P',
+                                  ifelse(NFL$score_home + NFL$score_away > NFL$over_under_line,'O','U'))
+```
+
+```{r, message=FALSE}
+nflTeams<- read.csv("nfl_teams.csv")
+
+team_names<- nflTeams$team_name
+team_ids<- nflTeams$team_id
+
+# Add id variables to get spread info since favorite was in ID form.
+
+NFL$team_home_id <- NA 
+NFL$team_away_id <- NA
+
+for (i in 1:nrow(NFL)) {
+        for(j in 1:length(team_ids)){
+                if(NFL$team_home[i]==team_names[j]){
+                        NFL$team_home_id[i]<-team_ids[j]
+                }
+        }
+}
+
+for (i in 1:nrow(NFL)) {
+        for(j in 1:length(team_ids)){
+                if(NFL$team_away[i]==team_names[j]){
+                        NFL$team_away_id[i]<-team_ids[j]
+                }
+        }
+}
+
+divisions <- nflTeams$team_division
+
+NFL$home_division <- NA
+NFL$away_division <- NA
+
+for (i in 1:nrow(NFL)) {
+        for(j in 1:length(divisions)){
+                if(NFL$team_home_id[i]==team_ids[j]){
+                        NFL$home_division[i]<-divisions[j]
+                }
+        }
+}
+
+for (i in 1:nrow(NFL)) {
+        for(j in 1:length(divisions)){
+                if(NFL$team_away_id[i]==team_ids[j]){
+                        NFL$away_division[i]<-divisions[j]
+                }
+        }
+}
+
+NFL$divisional_game <- ifelse(NFL$home_division==NFL$away_division, 1, 0)
+
+##created underdog id variable
+
+NFL$team_underdog_id <- ifelse(NFL$team_favorite_id == NFL$team_home_id,NFL$team_away_id, NFL$team_home_id)
+
+NFL$spread_cover_result <- ifelse(NFL$team_favorite_id == NFL$team_home_id & NFL$score_home +        NFL$spread_favorite == NFL$score_away, 2,
+                                           ifelse(NFL$team_favorite_id == NFL$team_away_id & NFL$score_away +        NFL$spread_favorite == NFL$score_home, 2, 
+                                                  ifelse(NFL$team_favorite_id == NFL$team_home_id & NFL$score_home +        NFL$spread_favorite > NFL$score_away,1,
+                                                   ifelse(NFL$team_favorite_id == NFL$team_away_id & NFL$score_away +        NFL$spread_favorite > NFL$score_home,1 , 0))))
+```
+
+```{r, message=FALSE}
+nflStadiums <- read.csv("nfl_stadiums2.csv")
+stadiums_name <- nflStadiums$stadium_name
+stadiums_type<- nflStadiums$stadium_type
+stadiums_surface<-nflStadiums$stadium_surface
+stadiums_capacity<- nflStadiums$stadium_capacity
+NFL$stadium_type <- NA
+NFL$stadium_surface <- NA
+NFL$stadium_elevation <- NULL
+NFL$stadium_capacity <- NA
+
+
+for (i in 1: length(stadiums_surface)){
+  if(stadiums_surface[i] == ""){
+  stadiums_surface[i] = "Grass"
+  }
+}
+
+for (i in 1:nrow(NFL)) {
+        for(j in 1:length(stadiums_name)){
+                if(NFL$stadium[i] == stadiums_name[j]){
+                        NFL$stadium_type[i]<-stadiums_type[j]
+                        NFL$stadium_capacity[i]<-stadiums_capacity[j]
+                        NFL$stadium_surface[i]<-stadiums_surface[j]
+                }
+        }
+}
+
+```
+
+
+```{r, message=FALSE}
+#How many times from 1979 to 2018 a team has covered the spread. If you bet on them as the favorite you won your bet.
+#Panthers, Jaguars, Ravens, Texans all partial outliers because they were not teams when the dataset started.
+#Panthers (1995), Jaguars(1995), Ravens(1996), Texans (2002)
+
+spread_count<-dplyr::summarize(group_by(filter(NFL, spread_cover_result == 1), team_favorite_id), count = n())
+
+arrange(spread_count, desc(count))
+```
+
+```{r, message=FALSE}
+#How many times from 1979 to 2018 a team if you bet on them as an underdog you would have won your bet
+#Panthers, Jaguars, Ravens, Texans all partial outliers because they were not teams when the dataset started.
+#Panthers (1995), Jaguars(1995), Ravens(1996), Texans (2002)
+
+spread_underdog_count<-dplyr::summarize(group_by(filter(NFL, spread_cover_result == 0), team_underdog_id), count = n())
+
+arrange(spread_underdog_count, desc(count))
+```
+
+```{r, message=FALSE}
+#How many times from 1979 to 2018 a team if you bet on their game to go over, the over hit, so you won your bet
+#Panthers, Jaguars, Ravens, Texans all partial outliers because they were not teams when the dataset started.
+#Panthers (1995), Jaguars(1995), Ravens(1996), Texans (2002)
+
+over_home_count<-dplyr::summarize(group_by(filter(NFL, over_under_result == 'O'), team_home_id), count = n())
+over_away_count<-dplyr::summarize(group_by(filter(NFL, over_under_result == 'O'), team_away_id), count = n())
+
+over_count<- over_home_count
+
+for(i in 1 :32){
+  if(over_home_count$team_home_id[i]== over_away_count$team_away_id[i]){
+    over_count$count[i]<-over_home_count$count[i] + over_away_count$count[i]
+  }
+}
+
+names(over_count)[1]<- 'team_id'
+
+arrange(over_count, desc(count))
+```
+
+```{r, message=FALSE}
+#How many times from 1979 to 2018 a team if you bet on their game to go over, the under hit, so you lost your bet
+#Panthers, Jaguars, Ravens, Texans all partial outliers because they were not teams when the dataset started.
+#Panthers (1995), Jaguars(1995), Ravens(1996), Texans (2002)
+
+under_home_count<-dplyr::summarize(group_by(filter(NFL, over_under_result == 'U'), team_home_id), count = n())
+under_away_count<-dplyr::summarize(group_by(filter(NFL, over_under_result == 'U'), team_away_id), count = n())
+
+under_count<- under_home_count
+
+for(i in 1 :32){
+  if(under_home_count$team_home_id[i]== under_away_count$team_away_id[i]){
+    under_count$count[i]<-under_home_count$count[i] + under_away_count$count[i]
+  }
+}
+
+names(under_count)[1]<- 'team_id'
+
+arrange(under_count, desc(count))
+```
+
+```{r, message=FALSE}
+#Proportions of games
+#Panthers, Jaguars, Ravens, Texans all partial outliers because they were not teams when the dataset started.
+#Panthers (1995), Jaguars(1995), Ravens(1996), Texans (2002)
+
+#Arrange all data frames by alphabet first then do the for loop
+spread_count_loss<-dplyr::summarize(group_by(filter(NFL, spread_cover_result == 0), team_favorite_id), count = n())
+spread_count_win<-dplyr::summarize(group_by(filter(NFL, spread_cover_result == 1), team_favorite_id), count = n())
+
+s_count_loss<-arrange(spread_count_loss, desc(team_favorite_id))
+s_count_win<-arrange(spread_count_win, desc(team_favorite_id))
+
+games_count<- s_count_win
+
+games_count$count<-NA
+games_count$spread_count<-NA
+games_count$cover_percentage <- NA
+
+for(i in 1 :32){
+  if(games_count$team_favorite_id[i] == s_count_win$team_favorite_id[i]){
+    games_count$count[i]<- s_count_win$count[i] + s_count_loss$count[i]
+    games_count$spread_count[i]<-s_count_win$count[i]
+    games_count$cover_percentage[i] <- s_count_win$count[i] / games_count$count[i]
+  }
+}
+
+names(games_count)[1]<- 'team_id'
+
+arrange(games_count, desc(cover_percentage))
+```
+```{r, message=FALSE}
+#Proportions of games
+#Panthers, Jaguars, Ravens, Texans all partial outliers because they were not teams when the dataset started.
+#Panthers (1995), Jaguars(1995), Ravens(1996), Texans (2002)
+
+#Arrange all data frames by alphabet first then do the for loop
+
+
+h_count2<-dplyr::summarize(group_by(NFL, team_home_id), count = n())
+a_count2<-dplyr::summarize(group_by(NFL, team_away_id), count = n())
+
+home_count2<-arrange(h_count2, desc(team_home_id))
+away_count2<-arrange(a_count2, desc(team_away_id))
+spread_counting2<- arrange(spread_underdog_count, desc(team_underdog_id))
+
+games_count2<-home_count2
+
+games_count2$spread_count<-NA
+games_count2$underdog_win_percentage <- NA
+
+for(i in 1 :32){
+  if(games_count2$team_home_id[i]== away_count2$team_away_id[i]){
+    games_count2$count[i]<-home_count2$count[i] + away_count2$count[i]
+    games_count2$spread_count[i]<-spread_counting2$count[i]
+    games_count2$underdog_win_percentage[i] <- spread_counting2$count[i] / games_count2$count[i]
+  }
+}
+
+names(games_count2)[1]<- 'team_id'
+
+arrange(games_count2, desc(underdog_win_percentage))
+```
+
+```{r, message=FALSE}
+# got rid of missing value for weather detail
+
+for(i in 1: nrow(NFL)){
+  if(NFL$weather_detail[i] == '')
+    NFL$weather_detail[i]<-'C'
+}
+
+for(i in 1: nrow(NFL)){
+  if(is.na(NFL$weather_humidity[i]) == TRUE)
+    NFL$weather_humidity[i]<- 0
+}
+
+for(i in 1: nrow(NFL)){
+  if(NFL$weather_detail[i] == 'Rain | Fog')
+    NFL$weather_detail[i]<-'R'
+}
+
+for(i in 1: nrow(NFL)){
+  if(NFL$weather_detail[i] == 'Snow | Fog')
+    NFL$weather_detail[i]<-'S'
+}
+
+for(i in 1: nrow(NFL)){
+  if(NFL$weather_detail[i] == 'Snow | Freezing Rain')
+    NFL$weather_detail[i]<-'S'
+}
+
+for(i in 1: nrow(NFL)){
+  if(NFL$weather_detail[i] == 'DOME (Open Roof)')
+    NFL$weather_detail[i]<-'D'
+}
+
+
+for(i in 1: nrow(NFL)){
+  if(NFL$weather_detail[i] == 'DOME')
+    NFL$weather_detail[i]<-'D'
+}
+
+
+for(i in 1: nrow(NFL)){
+  if(NFL$weather_detail[i] == 'Snow')
+    NFL$weather_detail[i]<-'S'
+}
+
+for(i in 1: nrow(NFL)){
+  if(NFL$weather_detail[i] == 'Fog')
+    NFL$weather_detail[i]<-'F'
+}
+
+for(i in 1: nrow(NFL)){
+  if(NFL$weather_detail[i] == 'Rain')
+    NFL$weather_detail[i]<-'R'
+}
+
+dplyr::summarize(group_by(NFL, weather_detail),count = n())
+```
+
+
+```{r, message=FALSE}
+#ggpairs
+un.NFL <- NFL[,-c(1,2,3,4,5,8,12,13,17,21,22,24,26,27,28)]
+ggpairs(na.omit(un.NFL[,-c(3,9,10,11)]))
+```
+
+```{r, message=FALSE}
+#clustering
+#2 clusters seems best
+new.NFL<-na.omit(un.NFL[,-c(3,9,10,11)])
+
+newob.final<-new.NFL
+
+d<- dist(newob.final)
+
+km.final2 <- kmeans(newob.final, 2, nstart = 20)
+  clusters <- as.character(km.final2$cluster)
+  table(clusters)
+
+km.final3 <- kmeans(newob.final, 3, nstart = 20)
+  clusters <- as.character(km.final3$cluster)
+  table(clusters)
+  
+km.final4<- kmeans(newob.final, 4, nstart = 20)
+  clusters <- as.character(km.final4$cluster)
+  table(clusters)
+  
+km.final5 <- kmeans(newob.final, 5, nstart = 20)
+  clusters <- as.character(km.final5$cluster)
+  table(clusters)
+  
+km.final6 <- kmeans(newob.final, 6, nstart = 20)
+  clusters <- as.character(km.final6$cluster)
+  table(clusters)
+
+km.final7 <- kmeans(newob.final, 7, nstart = 20)
+  clusters <- as.character(km.final7$cluster)
+  table(clusters)
+  
+library(cluster)
+
+plot(silhouette(km.final2$cluster, d))
+plot(silhouette(km.final3$cluster, d))
+plot(silhouette(km.final4$cluster, d))
+plot(silhouette(km.final5$cluster, d))
+plot(silhouette(km.final6$cluster, d))
+plot(silhouette(km.final7$cluster, d))
+```
+
+```{r, message=FALSE}
+#Supervised LDA
+#Accuracy of 51.207%
+
+Sup.NFL<- NFL[,-c(1,2,3,4,5,6,7,8,9,12,13,19,20,21,22,24,25,26,27,28)]
+
+set.seed(1)  
+fitControl <- trainControl(method = "cv", number = 5)
+
+final.lda<- train(na.omit(over_under_result) ~ ., 
+                  data = na.omit(Sup.NFL), 
+                  method = "lda",
+                  trControl = fitControl)
+final.lda
+
+pred.class<- predict(final.lda, Sup.NFL)
+pred.prob<- predict(final.lda, Sup.NFL, type= "prob")
+
+
+final.lda$final
+```
+
+```{r, message=FALSE}
+#Supervised Random Forest
+set.seed(1)  
+mtryGrid <- expand.grid(mtry = 1:3)
+fitControl <- trainControl(method = "cv", number = 5)
+
+final.rf<- train(na.omit(over_under_result) ~ ., 
+                  data = na.omit(Sup.NFL), 
+                  method = "rf",
+                  trControl = fitControl,
+                  tuneGrid=mtryGrid)
+final.rf
+
+varImp(final.rf)
+```
+
+
+
+
+
