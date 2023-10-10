@@ -16,7 +16,7 @@ from 2011-2022.
 
 Times series analysis of Hotel Producer Price Index using Seasonal Decomposition, Exponential Smoothing, and Box and Jenkins models.
 
-[View code]
+[View project report](/projects/STA534 Final Project.pdf)
 
 ---
 
