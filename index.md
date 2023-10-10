@@ -25,6 +25,8 @@ Times series analysis of Hotel Producer Price Index using Seasonal Decomposition
 In this project, I develop a model to predict the over/under result for NFL games using linear discriminant analysis and random forests.
 
 [View Project Report](/projects/NFL Betting Project.pdf)
+<br>
+[View Knitted Code](/projects/NFL Betting Data.pdf)
 
 ---
 
