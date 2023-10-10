@@ -8,6 +8,7 @@ description: > # your text below (remove <br> elements if you don't need line br
   Statistical Skills and Experience: 
   Linear Regression, Logistic Regression, ANOVA, Random and Mixed Effects Models,
   GLM Models, PCA, Random Forests, LDA, KNN, Clustering
+  <br><br>
   <a href="https://www.linkedin.com/in/jordyn-raguckas-004897178/">View My LinkedIn Profile</a> 
 remote_theme: pages-themes/minimal@v0.2.0
 plugins:
