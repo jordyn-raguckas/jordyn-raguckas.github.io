@@ -8,7 +8,7 @@ R Shiny website for the Eagles6 fantasy football league. Allows users to
 see each league member's individual and head-to-head statistics 
 from 2011-2022.
 
-[View website](https://jordynragu15.shinyapps.io/Eagles6_History/)
+[View Website](https://jordynragu15.shinyapps.io/Eagles6_History/)
 
 ---
 
@@ -16,7 +16,7 @@ from 2011-2022.
 
 Times series analysis of Hotel Producer Price Index using Seasonal Decomposition, Exponential Smoothing, and Box and Jenkins models.
 
-[View project report](/projects/Hotel PPI Time Series.pdf)
+[View Project Report](/projects/Hotel PPI Time Series.pdf)
 
 ---
 
@@ -24,7 +24,8 @@ Times series analysis of Hotel Producer Price Index using Seasonal Decomposition
 
 In this project, I develop a model to predict the over/under result for NFL games using linear discriminant analysis and random forests.
 
-[View code]
+[View Project Report](/projects/NFL Betting Project.pdf)
+[View R Markdown File](/project/NFL Betting.rmd)
 
 ---
 
